@@ -43,7 +43,7 @@ public:
     std::string receiveMessage();
 
 private:
-    static constexpr uint16_t Default_Timeout_In_Ms{ 1000 };
+    static constexpr uint16_t Default_Timeout_In_Ms{ 2000 };
 
     serial::Serial serialPort_m;
 
