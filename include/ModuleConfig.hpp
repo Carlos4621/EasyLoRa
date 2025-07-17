@@ -6,6 +6,7 @@
 #include <sstream>
 #include <bitset>
 
+/// @brief Clase de conveniencia que almacena la configuración del módulo
 class ModuleConfig {
 public:
 
@@ -16,6 +17,8 @@ public:
     ModuleConfig& setAddressHighByte(uint8_t highAddress) noexcept;
     ModuleConfig& setAddressLowByte(uint8_t lowAddress) noexcept;
     ModuleConfig& setNetId(uint8_t NETID) noexcept;
+
+    /// @throw InvalidChannel si el canal es mayor a 83
     ModuleConfig& setChannel(uint8_t channel);
     
     ModuleConfig& setEnableRSSI(bool enable) noexcept;
@@ -51,9 +54,17 @@ public:
     WORCycle getWorCycle() const noexcept;
     UARTBaudRate getUartBaudRate() const noexcept;
 
+    /// @brief Convierte el objeto a su análogo de protobuf
+    /// @return Objeto de protobuf
     ModuleConfiguration toProtobuf() const noexcept;
+
+    /// @brief Convierte el objeto enviado a su análogo de conveniencia
+    /// @param pbConfig Objeto de protobuf
+    /// @return Objeto de conveniencia
     static ModuleConfig fromProtobuf(const ModuleConfiguration& pbConfig) noexcept;
 
+    /// @brief Devuelve los datos de configuración en un formato leguble para su impresión
+    /// @return String legible con los datos del objeto
     [[nodiscard]]
     std::string toLegibleString() const noexcept;
 
