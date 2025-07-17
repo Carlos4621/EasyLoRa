@@ -8,12 +8,33 @@
 #include "EasyLoRaExceptions.hpp"
 #include "SuccessStatus.pb.h"
 
+/// @brief Clase para la comunicación con el módulo EasyLoRa
 class EasyLoRa {
 public:
+
+    /// @brief Constructor base
+    /// @param port Puerto USB en donde está conectado el módulo EasyloRa
+    /// @param baudRate BaudRate con el que te comunicarás al módulo, este debe ser igual al que tiene el módulo configurado actualmente
+    /// @throw PortDontOpen en caso de no poder abrir el puerto
+    /// @note En caso de no conocer el valor actual del baudrate puedes consultarlo o modificarlo a tu gusto
     explicit EasyLoRa(std::string_view port, uint32_t baudRate = 115200);
 
+    /// @brief Establece la configuración enviada
+    /// @param config Configuración a enviar
+    /// @throw SerializeError en caso de no poder serializar la configuración
+    /// @throw WriteError en caso de no poder escribir en el puerto
+    /// @throw SuccessDontReceived en caso de no recibir mensaje de confirmación de aplicación de cambios
+    /// @throw DeserializeError en caso de no poder desearilzar el mensaje de confirmación
+    /// @throw ModuleError en caso de error en el módulo
     void setConfiguration(const ModuleConfig &config);
 
+    /// @brief Obtiene la configuración actual del módulo
+    /// @return ModuleConfig con la configuración del módulo   
+    /// @throw SerializeError en caso de no poder serializar la solicitud de configuración
+    /// @throw WriteError en caso de no poder escribir en el puerto
+    /// @throw SuccessDontReceived en caso de no recibir información
+    /// @throw DeserializeError en caso de no poder desearizar el mensaje de confirmación o configuración
+    /// @throw ModuleError en caso de error en el módulo
     [[nodiscard]]
     ModuleConfig getConfiguration();
 
@@ -22,7 +43,7 @@ public:
     std::string receiveMessage();
 
 private:
-    static constexpr uint16_t Default_Timeout_In_Ms{ 2000 };
+    static constexpr uint16_t Default_Timeout_In_Ms{ 1000 };
 
     serial::Serial serialPort_m;
 
