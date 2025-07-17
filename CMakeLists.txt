@@ -33,20 +33,52 @@ endif()
 include_directories(external/serial/include)
 include_directories(include)
 
-add_executable(lora
-    main.cpp
-    external/serial/src/serial.cc
-    external/serial/src/impl/unix.cc
-    src/EasyLoRa.cpp
-    src/ModuleConfig.cpp
-    ${PROTO_SRCS}
-    ${PROTO_HDRS}
-)
+# Option to build as library or executable
+option(BUILD_AS_LIBRARY "Build EasyLoRa as library instead of executable" OFF)
 
-target_include_directories(lora PRIVATE 
-    external/serial/include
-    include
-    ${CMAKE_CURRENT_BINARY_DIR}
-)
+if(BUILD_AS_LIBRARY)
+    # Create EasyLoRa library
+    add_library(easylora STATIC
+        external/serial/src/serial.cc
+        external/serial/src/impl/unix.cc
+        src/EasyLoRa.cpp
+        src/ModuleConfig.cpp
+        ${PROTO_SRCS}
+        ${PROTO_HDRS}
+    )
 
-target_link_libraries(lora pthread protobuf::libprotobuf)
+    target_include_directories(easylora PUBLIC 
+        external/serial/include
+        include
+        ${CMAKE_CURRENT_BINARY_DIR}
+    )
+
+    target_link_libraries(easylora PUBLIC pthread protobuf::libprotobuf)
+    
+    # Export variables for parent project
+    set(EASYLORA_INCLUDE_DIRS 
+        ${CMAKE_CURRENT_SOURCE_DIR}/external/serial/include
+        ${CMAKE_CURRENT_SOURCE_DIR}/include
+        ${CMAKE_CURRENT_BINARY_DIR}
+        PARENT_SCOPE)
+    set(EASYLORA_LIBRARIES easylora pthread protobuf::libprotobuf PARENT_SCOPE)
+else()
+    # Original executable build
+    add_executable(lora
+        main.cpp
+        external/serial/src/serial.cc
+        external/serial/src/impl/unix.cc
+        src/EasyLoRa.cpp
+        src/ModuleConfig.cpp
+        ${PROTO_SRCS}
+        ${PROTO_HDRS}
+    )
+
+    target_include_directories(lora PRIVATE 
+        external/serial/include
+        include
+        ${CMAKE_CURRENT_BINARY_DIR}
+    )
+
+    target_link_libraries(lora pthread protobuf::libprotobuf)
+endif()
