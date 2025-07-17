@@ -44,6 +44,7 @@ public:
 
 private:
     static constexpr uint16_t Default_Timeout_In_Ms{ 2000 };
+    static constexpr uint8_t Size_Byte_Length{ 1 };
 
     serial::Serial serialPort_m;
 

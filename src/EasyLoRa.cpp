@@ -69,7 +69,9 @@ SuccessStatus EasyLoRa::getSuccesStatus() {
 }
 
 std::string EasyLoRa::readFromSerial() {
-    const auto serializedResponse{ serialPort_m.read(255) };
+    const auto messageLength{ static_cast<uint8_t>(serialPort_m.read(Size_Byte_Length)[0]) };
+
+    const auto serializedResponse{ serialPort_m.read(messageLength) };
 
     if (serializedResponse.empty()) {
         throw SuccessDontReceived{};
