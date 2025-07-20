@@ -16,6 +16,14 @@ elseif(CMAKE_BUILD_TYPE STREQUAL "Release")
     message(STATUS "Release mode enabled")
 endif()
 
+set(Protobuf_USE_STATIC_LIBS OFF)
+set(CMAKE_PREFIX_PATH "/usr")
+set(Protobuf_INCLUDE_DIR "/usr/include")
+set(Protobuf_LIBRARY "/usr/lib/x86_64-linux-gnu/libprotobuf.so")
+set(Protobuf_PROTOC_EXECUTABLE "/usr/bin/protoc")
+
+include_directories(BEFORE "/usr/include")
+
 find_package(Protobuf REQUIRED)
 
 set(PROTO_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/EasyLoRa_Proto)
@@ -38,7 +46,7 @@ option(BUILD_AS_LIBRARY "Build EasyLoRa as library instead of executable" OFF)
 
 if(BUILD_AS_LIBRARY)
     # Create EasyLoRa library
-    add_library(easylora STATIC
+    add_library(easylora SHARED
         external/serial/src/serial.cc
         external/serial/src/impl/unix.cc
         src/EasyLoRa.cpp
