@@ -65,6 +65,8 @@
         "variant": "cpp",
         "bitset": "cpp",
         "iomanip": "cpp",
-        "chrono": "cpp"
+        "chrono": "cpp",
+        "charconv": "cpp",
+        "format": "cpp"
     }
 }

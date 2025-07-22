@@ -12,7 +12,8 @@ public:
 
     class InvalidChannel;
 
-    ModuleConfig() = default;
+    [[nodiscard]]
+    bool operator==(const ModuleConfig&) const noexcept = default;
 
     ModuleConfig& setAddressHighByte(uint8_t highAddress) noexcept;
     ModuleConfig& setAddressLowByte(uint8_t lowAddress) noexcept;

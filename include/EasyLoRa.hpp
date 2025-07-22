@@ -36,10 +36,11 @@ public:
     /// @throw DeserializeError en caso de no poder desearizar el mensaje de confirmación o configuración
     /// @throw ModuleError en caso de error en el módulo
     [[nodiscard]]
-    ModuleConfig getConfiguration();
+    ModuleConfig getConfiguration() const noexcept;
 
     void sendMessage(const std::string &message);
 
+    [[nodiscard]]
     std::string receiveMessage();
 
 private:
@@ -47,6 +48,7 @@ private:
     static constexpr uint8_t Size_Byte_Length{ 1 };
 
     serial::Serial serialPort_m;
+    ModuleConfig actualConfiguration_m;
 
     void sendPackage(const Envelope& package);
 
@@ -68,6 +70,8 @@ private:
     SuccessStatus deserializeSuccessStatus(const std::string& data);
 
     void throwIfSuccesStatusError(const SuccessStatus& status);
+
+    ModuleConfig getConfigurationFromModule();
 };
 
 #endif // EASY_LORA_HPP

@@ -6,30 +6,27 @@ EasyLoRa::EasyLoRa(std::string_view port, uint32_t baudRate)
     if (!serialPort_m.isOpen()) {
         throw PortDontOpen{ port };
     }
+
+    actualConfiguration_m = getConfigurationFromModule();
 }
 
 void EasyLoRa::setConfiguration(const ModuleConfig &config) {
+
+    if (actualConfiguration_m == config) {
+        return;
+    }
+    
     Envelope packageToSend;
     *packageToSend.mutable_configuration() = config.toProtobuf();
     
     sendPackage(packageToSend);
     const auto succesData{ getSuccesStatus() };
     throwIfSuccesStatusError(succesData);
+    actualConfiguration_m = config;
 }
 
-ModuleConfig EasyLoRa::getConfiguration() {
-    Envelope packageToSend;
-    packageToSend.set_requestconfiguration(true);
-
-    sendPackage(packageToSend);
-    const auto data{ getResponseData() };
-
-    ModuleConfiguration protobuffData;
-    if (!protobuffData.ParseFromArray(data.data(), data.size())) {
-        throw DeserializeError{};
-    }
-
-    return ModuleConfig::fromProtobuf(protobuffData);
+ModuleConfig EasyLoRa::getConfiguration() const noexcept {
+    return actualConfiguration_m;
 }
 
 void EasyLoRa::sendPackage(const Envelope& package) {
@@ -93,4 +90,19 @@ void EasyLoRa::throwIfSuccesStatusError(const SuccessStatus &status) {
     if (status.PossibleData_case() == SuccessStatus::kError) {
         throw ModuleError{ status.error() };
     }
+}
+
+ModuleConfig EasyLoRa::getConfigurationFromModule() {
+    Envelope packageToSend;
+    packageToSend.set_requestconfiguration(true);
+
+    sendPackage(packageToSend);
+    const auto data{ getResponseData() };
+
+    ModuleConfiguration protobuffData;
+    if (!protobuffData.ParseFromArray(data.data(), data.size())) {
+        throw DeserializeError{};
+    }
+
+    return ModuleConfig::fromProtobuf(protobuffData);
 }
