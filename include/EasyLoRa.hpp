@@ -14,10 +14,8 @@ public:
 
     /// @brief Constructor base
     /// @param port Puerto USB en donde está conectado el módulo EasyloRa
-    /// @param baudRate BaudRate con el que te comunicarás al módulo, este debe ser igual al que tiene el módulo configurado actualmente
     /// @throw PortDontOpen en caso de no poder abrir el puerto
-    /// @note En caso de no conocer el valor actual del baudrate puedes consultarlo o modificarlo a tu gusto
-    explicit EasyLoRa(std::string_view port, uint32_t baudRate = 115200);
+    explicit EasyLoRa(std::string_view port);
 
     /// @brief Establece la configuración enviada
     /// @param config Configuración a enviar
@@ -46,6 +44,7 @@ public:
 private:
     static constexpr uint16_t Default_Timeout_In_Ms{ 2000 };
     static constexpr uint8_t Size_Byte_Length{ 1 };
+    static constexpr uint16_t Default_BaudRate{ 9600 };
 
     serial::Serial serialPort_m;
     ModuleConfig actualConfiguration_m;
@@ -72,6 +71,8 @@ private:
     void throwIfSuccesStatusError(const SuccessStatus& status);
 
     ModuleConfig getConfigurationFromModule();
+
+    void syncBaudRate();
 };
 
 #endif // EASY_LORA_HPP

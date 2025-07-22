@@ -1,13 +1,14 @@
 #include "EasyLoRa.hpp"
 
-EasyLoRa::EasyLoRa(std::string_view port, uint32_t baudRate) 
-: serialPort_m{ port.data(), baudRate, serial::Timeout::simpleTimeout(Default_Timeout_In_Ms) }
+EasyLoRa::EasyLoRa(std::string_view port) 
+: serialPort_m{ port.data(), Default_BaudRate, serial::Timeout::simpleTimeout(Default_Timeout_In_Ms) }
 {
     if (!serialPort_m.isOpen()) {
         throw PortDontOpen{ port };
     }
 
     actualConfiguration_m = getConfigurationFromModule();
+    syncBaudRate();
 }
 
 void EasyLoRa::setConfiguration(const ModuleConfig &config) {
@@ -22,7 +23,9 @@ void EasyLoRa::setConfiguration(const ModuleConfig &config) {
     sendPackage(packageToSend);
     const auto succesData{ getSuccesStatus() };
     throwIfSuccesStatusError(succesData);
+    
     actualConfiguration_m = config;
+    syncBaudRate();
 }
 
 ModuleConfig EasyLoRa::getConfiguration() const noexcept {
@@ -105,4 +108,44 @@ ModuleConfig EasyLoRa::getConfigurationFromModule() {
     }
 
     return ModuleConfig::fromProtobuf(protobuffData);
+}
+
+void EasyLoRa::syncBaudRate() {
+    switch (actualConfiguration_m.getUartBaudRate()) {
+    case UART_1200_BPS:
+        serialPort_m.setBaudrate(1200);
+        break;
+    
+    case UART_2400_BPS:
+        serialPort_m.setBaudrate(2400);
+        break;
+
+    case UART_4800_BPS:
+        serialPort_m.setBaudrate(4800);
+        break;
+    
+    case UART_9600_BPS:
+        serialPort_m.setBaudrate(9600);
+        break;
+
+    case UART_19200_BPS:
+        serialPort_m.setBaudrate(19200);
+        break;
+
+    case UART_38400_BPS:
+        serialPort_m.setBaudrate(38400);
+        break;
+
+    case UART_57600_BPS:
+        serialPort_m.setBaudrate(57600);
+        break;
+
+    case UART_115200_BPS:
+        serialPort_m.setBaudrate(115200);
+        break;
+
+    default:
+        std::unreachable();
+        break;
+    }
 }
