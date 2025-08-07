@@ -32,12 +32,14 @@ ModuleConfig EasyLoRa::getConfiguration() const noexcept {
 }
 
 void EasyLoRa::sendMessage(const std::string &message) {
-
+    Envelope packageToSend;
+    *packageToSend.mutable_datatosend() = message;
+    sendPackage(packageToSend);
 }
 
 std::string EasyLoRa::receiveMessage() {
     try {
-        
+        return getResponseData();
     }
     catch(const SuccessDontReceived& e) {
         return "";
