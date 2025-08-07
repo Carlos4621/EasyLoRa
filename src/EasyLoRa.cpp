@@ -12,7 +12,6 @@ EasyLoRa::EasyLoRa(std::string_view port)
 }
 
 void EasyLoRa::setConfiguration(const ModuleConfig &config) {
-
     if (actualConfiguration_m == config) {
         return;
     }
@@ -30,6 +29,19 @@ void EasyLoRa::setConfiguration(const ModuleConfig &config) {
 
 ModuleConfig EasyLoRa::getConfiguration() const noexcept {
     return actualConfiguration_m;
+}
+
+void EasyLoRa::sendMessage(const std::string &message) {
+
+}
+
+std::string EasyLoRa::receiveMessage() {
+    try {
+        
+    }
+    catch(const SuccessDontReceived& e) {
+        return "";
+    }
 }
 
 void EasyLoRa::sendPackage(const Envelope& package) {
@@ -65,6 +77,10 @@ std::string EasyLoRa::getResponseData() {
 SuccessStatus EasyLoRa::getSuccesStatus() {
     const auto rawData{ readFromSerial() };
 
+    if (rawData.empty()) {
+        throw SuccessDontReceived{};
+    }
+
     return deserializeSuccessStatus(rawData);
 }
 
@@ -73,9 +89,6 @@ std::string EasyLoRa::readFromSerial() {
 
     const auto serializedResponse{ serialPort_m.read(messageLength) };
 
-    if (serializedResponse.empty()) {
-        throw SuccessDontReceived{};
-    }
     return serializedResponse;
 }
 
