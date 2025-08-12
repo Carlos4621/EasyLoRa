@@ -31,7 +31,7 @@ ModuleConfig EasyLoRa::getConfiguration() const noexcept {
     return actualConfiguration_m;
 }
 
-void EasyLoRa::sendMessage(const std::string &message) {
+void EasyLoRa::sendMessage(std::string_view message) {
     Envelope packageToSend;
     *packageToSend.mutable_datatosend() = message;
     sendPackage(packageToSend);

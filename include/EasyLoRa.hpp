@@ -36,7 +36,7 @@ public:
     [[nodiscard]]
     ModuleConfig getConfiguration() const noexcept;
 
-    void sendMessage(const std::string &message);
+    void sendMessage(std::string_view message);
 
     [[nodiscard]]
     std::string receiveMessage();
