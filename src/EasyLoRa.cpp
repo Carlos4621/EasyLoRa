@@ -31,13 +31,13 @@ ModuleConfig EasyLoRa::getConfiguration() const noexcept {
     return actualConfiguration_m;
 }
 
-void EasyLoRa::sendMessage(std::string_view message) {
+void EasyLoRa::sendData(std::string_view message) {
     Envelope packageToSend;
     *packageToSend.mutable_datatosend() = message;
     sendPackage(packageToSend);
 }
 
-std::string EasyLoRa::receiveMessage() {
+std::string EasyLoRa::receiveData() {
     try {
         return getResponseData();
     }

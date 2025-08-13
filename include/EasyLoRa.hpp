@@ -37,10 +37,10 @@ public:
     [[nodiscard]]
     ModuleConfig getConfiguration() const noexcept;
 
-    void sendMessage(std::string_view message) override;
+    void sendData(std::string_view message) override;
 
     [[nodiscard]]
-    std::string receiveMessage() override;
+    std::string receiveData() override;
 
 private:
     static constexpr uint16_t Default_Timeout_In_Ms{ 2000 };
