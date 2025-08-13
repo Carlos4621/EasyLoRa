@@ -5,6 +5,7 @@
 #include <cstdint>
 #include <string>
 
+/// @brief Clase abstracta para EasyLoRa, EasyUDP y similares
 class IOCommons {
 public:
     virtual void sendData(std::string_view data) = 0;

@@ -37,8 +37,12 @@ public:
     [[nodiscard]]
     ModuleConfig getConfiguration() const noexcept;
 
+    /// @brief Envía datos para su transmisión mediante el módulo EasyLoRa
+    /// @param message Datos a enviar
     void sendData(std::string_view message) override;
 
+    /// @brief Recibe datos trasmitidos por otro dispositivo EasyLoRa
+    /// @return Datos recibidos, puede estar vacío
     [[nodiscard]]
     std::string receiveData() override;
 
