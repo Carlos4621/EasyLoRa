@@ -7,9 +7,10 @@
 #include "ModuleConfig.hpp"
 #include "EasyLoRaExceptions.hpp"
 #include "SuccessStatus.pb.h"
+#include "IOCommons.hpp"
 
 /// @brief Clase para la comunicación con el módulo EasyLoRa
-class EasyLoRa {
+class EasyLoRa : public IOCommons {
 public:
 
     /// @brief Constructor base
@@ -36,10 +37,10 @@ public:
     [[nodiscard]]
     ModuleConfig getConfiguration() const noexcept;
 
-    void sendMessage(std::string_view message);
+    void sendMessage(std::string_view message) override;
 
     [[nodiscard]]
-    std::string receiveMessage();
+    std::string receiveMessage() override;
 
 private:
     static constexpr uint16_t Default_Timeout_In_Ms{ 2000 };
