@@ -37,15 +37,6 @@ void EasyLoRa::sendData(std::string_view message) {
     sendPackage(packageToSend);
 }
 
-std::string EasyLoRa::receiveData() {
-    try {
-        return getResponseData();
-    }
-    catch(const SuccessDontReceived& e) {
-        return "";
-    }
-}
-
 void EasyLoRa::sendPackage(const Envelope& package) {
     const auto serializedPackage{ serializePackage(package) };
     writeToSerial(serializedPackage);
@@ -77,7 +68,7 @@ std::string EasyLoRa::getResponseData() {
 }
 
 SuccessStatus EasyLoRa::getSuccesStatus() {
-    const auto rawData{ readFromSerial() };
+    const auto rawData{ receiveData() };
 
     if (rawData.empty()) {
         throw SuccessDontReceived{};
@@ -86,12 +77,10 @@ SuccessStatus EasyLoRa::getSuccesStatus() {
     return deserializeSuccessStatus(rawData);
 }
 
-std::string EasyLoRa::readFromSerial() {
+std::string EasyLoRa::receiveData() {
     const auto messageLength{ static_cast<uint8_t>(serialPort_m.read(Size_Byte_Length)[0]) };
 
-    const auto serializedResponse{ serialPort_m.read(messageLength) };
-
-    return serializedResponse;
+    return serialPort_m.read(messageLength);
 }
 
 SuccessStatus EasyLoRa::deserializeSuccessStatus(const std::string& data) {

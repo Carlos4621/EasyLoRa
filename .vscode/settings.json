@@ -67,6 +67,7 @@
         "iomanip": "cpp",
         "chrono": "cpp",
         "charconv": "cpp",
-        "format": "cpp"
+        "format": "cpp",
+        "complex": "cpp"
     }
 }

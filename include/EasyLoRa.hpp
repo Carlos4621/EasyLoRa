@@ -68,9 +68,6 @@ private:
     SuccessStatus getSuccesStatus();
 
     [[nodiscard]]
-    std::string readFromSerial();
-
-    [[nodiscard]]
     SuccessStatus deserializeSuccessStatus(const std::string& data);
 
     void throwIfSuccesStatusError(const SuccessStatus& status);
