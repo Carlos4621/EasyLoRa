@@ -8,7 +8,7 @@ EasyLoRa::EasyLoRa(std::string_view port)
     }
 
     actualConfiguration_m = getConfigurationFromModule();
-    syncBaudRate();
+    serialPort_m.setBaudrate(ModuleConfig::toBaudRateValue(actualConfiguration_m.getUartBaudRate()));
 }
 
 void EasyLoRa::setConfiguration(const ModuleConfig &config) {
@@ -19,12 +19,25 @@ void EasyLoRa::setConfiguration(const ModuleConfig &config) {
     Envelope packageToSend;
     *packageToSend.mutable_configuration() = config.toProtobuf();
     
-    sendPackage(packageToSend);
-    const auto succesData{ getSuccesStatus() };
-    throwIfSuccesStatusError(succesData);
+    const auto ack{ requestInformation(packageToSend) };
+    if (!ack.ack()) {
+        throw SuccessDontReceived{};
+    }
     
     actualConfiguration_m = config;
-    syncBaudRate();
+    serialPort_m.setBaudrate(ModuleConfig::toBaudRateValue(actualConfiguration_m.getUartBaudRate()));
+}
+
+ModuleConfig EasyLoRa::getConfigurationFromModule() {
+    Envelope packageToSend;
+    packageToSend.set_requestconfiguration(true);
+
+    const auto response{ requestInformation(packageToSend) };
+    if (!response.has_configuration()) {
+        throw SuccessDontReceived{};
+    }
+
+    return ModuleConfig::fromProtobuf(response.configuration());
 }
 
 ModuleConfig EasyLoRa::getConfiguration() const noexcept {
@@ -33,13 +46,21 @@ ModuleConfig EasyLoRa::getConfiguration() const noexcept {
 
 void EasyLoRa::sendData(std::string_view message) {
     Envelope packageToSend;
-    *packageToSend.mutable_datatosend() = message;
-    sendPackage(packageToSend);
+    *packageToSend.mutable_data() = message;
+    sendEnvelope(packageToSend);
 }
 
-void EasyLoRa::sendPackage(const Envelope& package) {
+void EasyLoRa::sendEnvelope(const Envelope& package) {
     const auto serializedPackage{ serializePackage(package) };
     writeToSerial(serializedPackage);
+}
+
+Envelope EasyLoRa::requestInformation(const Envelope &package) {
+    sendEnvelope(package);
+    const auto response{ deserializeEnvelope(receiveData()) };
+    throwIfEnvelopeError(response);
+
+    return response;
 }
 
 std::string EasyLoRa::serializePackage(const Envelope& package) {
@@ -47,8 +68,9 @@ std::string EasyLoRa::serializePackage(const Envelope& package) {
     if (!package.SerializeToString(&serializedPackage)) {
         throw SerializeError{};
     }
-    
+
     serializedPackage.insert(serializedPackage.cbegin(), static_cast<uint8_t>(serializedPackage.size()));
+
     return serializedPackage;
 }
 
@@ -59,97 +81,25 @@ void EasyLoRa::writeToSerial(const std::string& data) {
     }
 }
 
-std::string EasyLoRa::getResponseData() {
-    const auto success{ getSuccesStatus() };
-    
-    throwIfSuccesStatusError(success);
-
-    return success.data();
-}
-
-SuccessStatus EasyLoRa::getSuccesStatus() {
-    const auto rawData{ receiveData() };
-
-    if (rawData.empty()) {
-        throw SuccessDontReceived{};
-    }
-
-    return deserializeSuccessStatus(rawData);
-}
-
+// TODO: Implementar timeout
 std::string EasyLoRa::receiveData() {
     const auto messageLength{ static_cast<uint8_t>(serialPort_m.read(Size_Byte_Length)[0]) };
 
     return serialPort_m.read(messageLength);
 }
 
-SuccessStatus EasyLoRa::deserializeSuccessStatus(const std::string& data) {
-    SuccessStatus succesStatus;
+Envelope EasyLoRa::deserializeEnvelope(const std::string& data) {
+    Envelope envelope;
     
-    if (!succesStatus.ParseFromArray(data.data(), data.size())) {
+    if (!envelope.ParseFromArray(data.data(), data.size())) {
         throw DeserializeError{};
     }
     
-    return succesStatus;
+    return envelope;
 }
 
-void EasyLoRa::throwIfSuccesStatusError(const SuccessStatus &status) {
-    if (status.PossibleData_case() == SuccessStatus::kError) {
+void EasyLoRa::throwIfEnvelopeError(const Envelope& status) {
+    if (status.PosibleData_case() == Envelope::kError) {
         throw ModuleError{ status.error() };
-    }
-}
-
-ModuleConfig EasyLoRa::getConfigurationFromModule() {
-    Envelope packageToSend;
-    packageToSend.set_requestconfiguration(true);
-
-    sendPackage(packageToSend);
-    const auto data{ getResponseData() };
-
-    ModuleConfiguration protobuffData;
-    if (!protobuffData.ParseFromArray(data.data(), data.size())) {
-        throw DeserializeError{};
-    }
-
-    return ModuleConfig::fromProtobuf(protobuffData);
-}
-
-void EasyLoRa::syncBaudRate() {
-    switch (actualConfiguration_m.getUartBaudRate()) {
-    case UART_1200_BPS:
-        serialPort_m.setBaudrate(1200);
-        break;
-    
-    case UART_2400_BPS:
-        serialPort_m.setBaudrate(2400);
-        break;
-
-    case UART_4800_BPS:
-        serialPort_m.setBaudrate(4800);
-        break;
-    
-    case UART_9600_BPS:
-        serialPort_m.setBaudrate(9600);
-        break;
-
-    case UART_19200_BPS:
-        serialPort_m.setBaudrate(19200);
-        break;
-
-    case UART_38400_BPS:
-        serialPort_m.setBaudrate(38400);
-        break;
-
-    case UART_57600_BPS:
-        serialPort_m.setBaudrate(57600);
-        break;
-
-    case UART_115200_BPS:
-        serialPort_m.setBaudrate(115200);
-        break;
-
-    default:
-        std::unreachable();
-        break;
     }
 }

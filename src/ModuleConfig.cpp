@@ -213,6 +213,14 @@ ModuleConfig ModuleConfig::fromProtobuf(const ModuleConfiguration& pbConfig) noe
     return config;
 }
 
+uint32_t ModuleConfig::toBaudRateValue(UARTBaudRate baudRate) {
+    if (baudRate < 0 || static_cast<size_t>(baudRate) > Baud_Rate_Map.size()) {
+        throw std::invalid_argument{ "Invalid baudrate" };
+    }
+
+    return Baud_Rate_Map[std::to_underlying(baudRate)];
+}
+
 std::string ModuleConfig::toLegibleString() const noexcept {
     std::ostringstream output;
 
@@ -226,7 +234,7 @@ std::string ModuleConfig::toLegibleString() const noexcept {
     "Subpacket: " << std::bitset<2>(subpacketLength_m) << '\n' <<
     "RSSI noise: " << rssiByteEnabled_m << '\n' <<
     "Abnormal register: " << enableAbnormalLog_m << '\n' <<
-    "Channel: " << std::hex << static_cast<uint16_t>(channel_m) << '\n' <<
+    "Channel: " << static_cast<uint16_t>(channel_m) << '\n' <<
     "Enable RSSI: " << enableRSSI_m << '\n' <<
     "Transmition method: " << enableFixedTransmitionMode_m << '\n' <<
     "Relay Mode: " << enableRepeaterMode_m << '\n' <<

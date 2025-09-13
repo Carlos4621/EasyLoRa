@@ -64,6 +64,8 @@ public:
     /// @return Objeto de conveniencia
     static ModuleConfig fromProtobuf(const ModuleConfiguration& pbConfig) noexcept;
 
+    static uint32_t toBaudRateValue(UARTBaudRate baudRate);
+
     /// @brief Devuelve los datos de configuración en un formato leguble para su impresión
     /// @return String legible con los datos del objeto
     [[nodiscard]]
@@ -71,6 +73,8 @@ public:
 
 private:
     static constexpr uint8_t Max_Channel{ 83 };
+
+    static constexpr std::array Baud_Rate_Map{ 1200, 2400, 4800, 9600, 19200, 38400, 57600, 115200 };
 
     uint8_t addressHighByte_m{ 0 };
     uint8_t addressLowByte_m{ 0 };

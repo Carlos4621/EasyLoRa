@@ -6,7 +6,6 @@
 #include "Envelope.pb.h"
 #include "ModuleConfig.hpp"
 #include "EasyLoRaExceptions.hpp"
-#include "SuccessStatus.pb.h"
 #include "IOCommons.hpp"
 
 /// @brief Clase para la comunicación con el módulo EasyLoRa
@@ -49,12 +48,14 @@ public:
 private:
     static constexpr uint16_t Default_Timeout_In_Ms{ 2000 };
     static constexpr uint8_t Size_Byte_Length{ 1 };
-    static constexpr uint16_t Default_BaudRate{ 9600 };
+    static constexpr uint32_t Default_BaudRate{ 115200 };
 
     serial::Serial serialPort_m;
     ModuleConfig actualConfiguration_m;
 
-    void sendPackage(const Envelope& package);
+    void sendEnvelope(const Envelope& package);
+
+    Envelope requestInformation(const Envelope& package);
 
     [[nodiscard]]
     std::string serializePackage(const Envelope& package);
@@ -62,19 +63,11 @@ private:
     void writeToSerial(const std::string& data);
 
     [[nodiscard]]
-    std::string getResponseData();
+    Envelope deserializeEnvelope(const std::string& data);
 
-    [[nodiscard]]
-    SuccessStatus getSuccesStatus();
-
-    [[nodiscard]]
-    SuccessStatus deserializeSuccessStatus(const std::string& data);
-
-    void throwIfSuccesStatusError(const SuccessStatus& status);
+    void throwIfEnvelopeError(const Envelope& status);
 
     ModuleConfig getConfigurationFromModule();
-
-    void syncBaudRate();
 };
 
 #endif // EASY_LORA_HPP
