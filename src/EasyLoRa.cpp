@@ -50,6 +50,14 @@ void EasyLoRa::sendData(std::string_view message) {
     sendEnvelope(packageToSend);
 }
 
+// TODO: Implementar timeout, Si un paquete que no es data es recibido, se producirá violación de segmento
+std::string EasyLoRa::receiveData() {
+    const auto response{ deserializeEnvelope(readFromSerial()) };
+    throwIfEnvelopeError(response);
+
+    return response.data();
+}
+
 void EasyLoRa::sendEnvelope(const Envelope& package) {
     const auto serializedPackage{ serializePackage(package) };
     writeToSerial(serializedPackage);
@@ -57,7 +65,10 @@ void EasyLoRa::sendEnvelope(const Envelope& package) {
 
 Envelope EasyLoRa::requestInformation(const Envelope &package) {
     sendEnvelope(package);
-    const auto response{ deserializeEnvelope(receiveData()) };
+
+    serialPort_m.flush();
+
+    const auto response{ deserializeEnvelope(readFromSerial()) };
     throwIfEnvelopeError(response);
 
     return response;
@@ -81,10 +92,9 @@ void EasyLoRa::writeToSerial(const std::string& data) {
     }
 }
 
-// TODO: Implementar timeout
-std::string EasyLoRa::receiveData() {
+std::string EasyLoRa::readFromSerial() {
     const auto messageLength{ static_cast<uint8_t>(serialPort_m.read(Size_Byte_Length)[0]) };
-
+    
     return serialPort_m.read(messageLength);
 }
 

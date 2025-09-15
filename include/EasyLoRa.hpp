@@ -8,6 +8,19 @@
 #include "EasyLoRaExceptions.hpp"
 #include "IOCommons.hpp"
 
+/*
+    TODO:
+
+        - Seguir con las mejoras en los métodos
+
+    - Hay un error raro que produce que no se pueda enviar datos a transmitir, requiere más investigación
+        * pistas:
+            - sucede al hacer ctrl + c en medio de una transmisión y querer volver a iniciar un programa
+        * Posible problema:
+            - El dispositivo sigue enviando mensajes debido al cierre incorrecto de la aplicación, provocando que al momento de llamar al constructor se
+              no se reciba el mensaje con la configuración actual del módulo
+*/
+
 /// @brief Clase para la comunicación con el módulo EasyLoRa
 class EasyLoRa : public IOCommons {
 public:
@@ -61,6 +74,8 @@ private:
     std::string serializePackage(const Envelope& package);
 
     void writeToSerial(const std::string& data);
+
+    std::string readFromSerial();
 
     [[nodiscard]]
     Envelope deserializeEnvelope(const std::string& data);
