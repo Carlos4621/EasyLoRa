@@ -1,7 +1,7 @@
 #include "EasyLoRa.hpp"
 
 EasyLoRa::EasyLoRa(std::string_view port) 
-: serialPort_m{ port.data(), Default_BaudRate, serial::Timeout::simpleTimeout(Default_Timeout_In_Ms) }
+: serialPort_m{ port.data(), Default_BaudRate, serial_cpp::Timeout::simpleTimeout(Default_Timeout_In_Ms) }
 {
     if (!serialPort_m.isOpen()) {
         throw PortDontOpen{ port };
@@ -16,7 +16,7 @@ void EasyLoRa::setConfiguration(const ModuleConfig &config, bool syncWithReceive
         return;
     }
     
-    serialPort_m.setTimeout(serial::Timeout::simpleTimeout(Default_Configuration_Sync_Timeout_In_Ms));
+    serialPort_m.setTimeout(serial_cpp::Timeout::simpleTimeout(Default_Configuration_Sync_Timeout_In_Ms));
 
     Envelope packageToSend;
     *packageToSend.mutable_configuration() = config.toProtobuf();
@@ -38,7 +38,7 @@ void EasyLoRa::setConfiguration(const ModuleConfig &config, bool syncWithReceive
         }
     }
 
-    serialPort_m.setTimeout(serial::Timeout::simpleTimeout(Default_Timeout_In_Ms));
+    serialPort_m.setTimeout(serial_cpp::Timeout::simpleTimeout(Default_Timeout_In_Ms));
     
     actualConfiguration_m = config;
     serialPort_m.setBaudrate(ModuleConfig::toBaudRateValue(actualConfiguration_m.getUartBaudRate()));

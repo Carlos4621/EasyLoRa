@@ -38,7 +38,7 @@ else()
     message(WARNING "No .proto files found in ${PROTO_SRC_DIR}")
 endif()
 
-include_directories(external/serial/include)
+include_directories(external/serial_cpp/include)
 include_directories(include)
 
 # Option to build as library or executable
@@ -47,8 +47,8 @@ option(BUILD_AS_LIBRARY "Build EasyLoRa as library instead of executable" OFF)
 if(BUILD_AS_LIBRARY)
     # Create EasyLoRa library
     add_library(easylora SHARED
-        external/serial/src/serial.cc
-        external/serial/src/impl/unix.cc
+        external/serial_cpp/src/serial.cc
+        external/serial_cpp/src/impl/unix.cc
         src/EasyLoRa.cpp
         src/ModuleConfig.cpp
         ${PROTO_SRCS}
@@ -56,7 +56,7 @@ if(BUILD_AS_LIBRARY)
     )
 
     target_include_directories(easylora PUBLIC 
-        external/serial/include
+        external/serial_cpp/include
         include
         ${CMAKE_CURRENT_BINARY_DIR}
     )
@@ -65,7 +65,7 @@ if(BUILD_AS_LIBRARY)
     
     # Export variables for parent project
     set(EASYLORA_INCLUDE_DIRS 
-        ${CMAKE_CURRENT_SOURCE_DIR}/external/serial/include
+        ${CMAKE_CURRENT_SOURCE_DIR}/external/serial_cpp/include
         ${CMAKE_CURRENT_SOURCE_DIR}/include
         ${CMAKE_CURRENT_BINARY_DIR}
         PARENT_SCOPE)
@@ -74,8 +74,8 @@ else()
     # Original executable build
     add_executable(lora
         main.cpp
-        external/serial/src/serial.cc
-        external/serial/src/impl/unix.cc
+        external/serial_cpp/src/serial.cc
+        external/serial_cpp/src/impl/unix.cc
         src/EasyLoRa.cpp
         src/ModuleConfig.cpp
         ${PROTO_SRCS}
@@ -83,7 +83,7 @@ else()
     )
 
     target_include_directories(lora PRIVATE 
-        external/serial/include
+        external/serial_cpp/include
         include
         ${CMAKE_CURRENT_BINARY_DIR}
     )

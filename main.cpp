@@ -1,5 +1,5 @@
 // Este archivo es temporal, no está planeado dejarlo en el repositorio.
-#include "serial/serial.h"
+#include "serial_cpp/serial.h"
 #include "EasyLoRa.hpp"
 #include "ModuleConfig.hpp"
 #include <thread>

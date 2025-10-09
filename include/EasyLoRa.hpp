@@ -1,7 +1,7 @@
 #ifndef EASY_LORA_HPP
 #define EASY_LORA_HPP
 
-#include "serial/serial.h"
+#include "serial_cpp/serial.h"
 #include <string_view>
 #include "Envelope.pb.h"
 #include "ModuleConfig.hpp"
@@ -68,7 +68,7 @@ private:
     static constexpr uint8_t Size_Byte_Length{ 1 };
     static constexpr uint32_t Default_BaudRate{ 115200 };
 
-    serial::Serial serialPort_m;
+    serial_cpp::Serial serialPort_m;
     ModuleConfig actualConfiguration_m;
 
     void sendEnvelope(const Envelope& package);
