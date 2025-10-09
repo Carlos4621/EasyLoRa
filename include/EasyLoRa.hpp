@@ -30,14 +30,17 @@ public:
     /// @throw PortDontOpen en caso de no poder abrir el puerto
     explicit EasyLoRa(std::string_view port);
 
+    // TODO: Añadir la excepción lanzada si no se sincroniza
+
     /// @brief Establece la configuración enviada
     /// @param config Configuración a enviar
+    /// @param syncWithReceiver Indica si se quiere sincronizar la configuración con el módulo oyente
     /// @throw SerializeError en caso de no poder serializar la configuración
     /// @throw WriteError en caso de no poder escribir en el puerto
     /// @throw SuccessDontReceived en caso de no recibir mensaje de confirmación de aplicación de cambios
     /// @throw DeserializeError en caso de no poder desearilzar el mensaje de confirmación
     /// @throw ModuleError en caso de error en el módulo
-    void setConfiguration(const ModuleConfig &config);
+    void setConfiguration(const ModuleConfig &config, bool syncWithReceiver = false);
 
     /// @brief Obtiene la configuración actual del módulo
     /// @return ModuleConfig con la configuración del módulo   
@@ -59,7 +62,9 @@ public:
     std::string receiveData() override;
 
 private:
-    static constexpr uint16_t Default_Timeout_In_Ms{ 2000 };
+    static constexpr uint16_t Default_Timeout_In_Ms{ 100 };
+    static constexpr uint32_t Default_Configuration_Sync_Timeout_In_Ms{ Default_Timeout_In_Ms * 10 };
+
     static constexpr uint8_t Size_Byte_Length{ 1 };
     static constexpr uint32_t Default_BaudRate{ 115200 };
 

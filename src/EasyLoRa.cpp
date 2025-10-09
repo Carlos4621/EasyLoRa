@@ -11,18 +11,34 @@ EasyLoRa::EasyLoRa(std::string_view port)
     serialPort_m.setBaudrate(ModuleConfig::toBaudRateValue(actualConfiguration_m.getUartBaudRate()));
 }
 
-void EasyLoRa::setConfiguration(const ModuleConfig &config) {
+void EasyLoRa::setConfiguration(const ModuleConfig &config, bool syncWithReceiver) {
     if (actualConfiguration_m == config) {
         return;
     }
     
+    serialPort_m.setTimeout(serial::Timeout::simpleTimeout(Default_Configuration_Sync_Timeout_In_Ms));
+
     Envelope packageToSend;
     *packageToSend.mutable_configuration() = config.toProtobuf();
+    packageToSend.mutable_configuration()->set_syncwithreceiver(syncWithReceiver);
+    
+    if (syncWithReceiver) {
+        packageToSend.mutable_ackrequirements()->set_timeout(Default_Configuration_Sync_Timeout_In_Ms);
+    }
     
     const auto ack{ requestInformation(packageToSend) };
     if (!ack.ack()) {
         throw SuccessDontReceived{};
     }
+
+    if (syncWithReceiver) {
+        const auto response{ deserializeEnvelope(readFromSerial()) };
+        if (!response.ack()) {
+            throw SuccessDontReceived{};
+        }
+    }
+
+    serialPort_m.setTimeout(serial::Timeout::simpleTimeout(Default_Timeout_In_Ms));
     
     actualConfiguration_m = config;
     serialPort_m.setBaudrate(ModuleConfig::toBaudRateValue(actualConfiguration_m.getUartBaudRate()));
@@ -50,7 +66,7 @@ void EasyLoRa::sendData(std::string_view message) {
     sendEnvelope(packageToSend);
 }
 
-// TODO: Implementar timeout, Si un paquete que no es data es recibido, se producirá violación de segmento
+// TODO: Implementar timeout, Si un paquete que no es data o error es recibido, se producirá violación de segmento
 std::string EasyLoRa::receiveData() {
     const auto response{ deserializeEnvelope(readFromSerial()) };
     throwIfEnvelopeError(response);
